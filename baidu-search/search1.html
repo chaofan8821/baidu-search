@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>百度一下,你就知道</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="jquery.min.js"></script>
+</head>
+<body>
+	<div class="header">
+		<a href="">新闻</a>
+		<a href="">hao123</a>
+		<a href="">地图</a>
+		<a href="">视频</a>
+		<a href="">贴吧</a>
+		<a href="">学术</a>
+		<div>
+			<span>更多产品</span>
+			<div class="list"></div>
+		</div>
+		<div>
+			<span>设置</span>
+			<div class="list"></div>
+		</div>
+		<div>
+			<span>登录</span>
+		</div>
+	</div>
+	<br class="clear">
+	<div class="main">
+		<!-- <img src="https://www.baidu.com/img/bd_logo1.png" alt=""> -->
+		<img src="./imgs/logo.jpg" alt="">
+		<div class="search-container">
+			<input class="searchVal" type="text" placeholder="输入关键字">
+			<button>百度一下</button>
+			<div class="search-list"></div>
+		</div>
+	</div>
+	<div class="footer">
+		<img src="https://ss1.bdstatic.com/5eN1bjq8AAUYm2zgoY3K/r/www/cache/static/protocol/https/home/img/qrcode/zbios_efde696.png" alt="">
+		<p class="qrcode-text">百度</p>
+		<div class="about">
+			<a href="">把百度设为主页</a>
+			<a href="">关于百度</a>
+			<a href="">About  Baidu</a>
+			<a href="">百度推广</a>
+		</div>
+		<div class="guide">
+			<span>©2019 Baidu</span>
+			<a href="">使用百度前必读</a>
+			<a href="">意见反馈</a>
+			<span>京ICP证030173号　　　</span>
+			<a href="">京公网安备11000002000001号</a>
+		</div>
+	</div>
+	<script>
+		$(function() {
+			var activedIndex = -1;
+			var Utils = {
+				request: function(val) {
+					activedIndex = -1;
+					$.get('https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd='+ val +'&cb=callback', function(data, status){
+				        // console.log('Data: ' + data + 'nStatus: ' + status);
+				        // callback(data);
+				    }, 'JSONP');
+				}
+			}
+			$('.searchVal').on('input', function(e) {
+				if (e.target.value) {
+					Utils.request(e.target.value);
+				}
+			});
+			$('.searchVal').on('focus', function(e) {
+				if (e.target.value) {
+					Utils.request(e.target.value);
+				}
+			});
+			$('.searchVal').on('blur', function(e) {
+				$('.search-list').css('opacity', '0');
+			});
+			$('.search-container button').on('click', function() {
+				window.open('https://www.baidu.com/s?wd=' + $('.searchVal').val());
+			});
+			// $('.search-list').on('click', 'a', function(e) {
+			// 	console.log(e.target);
+			// 	if (e.target.tagName.toLowerCase() === 'a') {
+			// 		window.location.href = 'https://www.baidu.com/s?wd=' + e.target.textContent;
+			// 	}
+			// });
+			$('.searchVal').keydown(function(e) {
+				// console.log(e.keyCode)
+				if (e.keyCode === 13) {
+					window.open('https://www.baidu.com/s?wd=' + $('.searchVal').val());
+					return;
+				} else if (e.keyCode === 38 || e.keyCode === 40) {
+					if (e.keyCode === 40) { // 下移
+						activedIndex++;
+						if (activedIndex > $('.search-list a').length - 1) {
+							activedIndex = 0;
+						}
+					} else { // 上移
+						activedIndex--;
+						if (activedIndex <=-1) {
+							activedIndex = -1;
+							$('.search-list a').removeClass('active')
+							return;
+						}
+					}
+					$('.search-list a').removeClass('active').eq(activedIndex).addClass('active');
+					$('.searchVal').val($('.search-list a').eq(activedIndex).text());
+					setCaretPosition($('.searchVal')[0], $('.searchVal').val().length);
+				}
+			})
+		});
+		function setCaretPosition(obj, len) { // 设置光标位置
+			 // Modern browsers
+			 // console.log(obj)
+            if(obj.setSelectionRange) {
+            	setTimeout(function(){
+	                obj.setSelectionRange(len, len);
+	                setTimeout(function() {
+	                	obj.focus();
+	                }, 0)
+            	}, 0);
+                // IE8 and below
+            } else if(obj.createTextRange) {
+                var range = obj.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', len);
+                range.moveStart('character', len);
+                range.select();
+            }
+		}
+		function callback(res) {
+			// console.log(res);
+			$('.search-list').css('opacity', '1');
+			var strLi = '';
+			 for (var i=0; i<res.s.length; i++) {
+			 	strLi += '<a href="https://www.baidu.com/s?wd='+ res.s[i] +'" target="_blank">'+ res.s[i] +'</a>';
+			 }
+			 $('.search-list').html(strLi);
+		}
+	</script>
+</body>
+</html>
